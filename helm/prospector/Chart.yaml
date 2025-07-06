@@ -1,0 +1,6 @@
+apiVersion: v2
+name: prospector
+description: SeedPod Prospector micro-service
+type: application
+version: 0.1.0        # chart version
+appVersion: "latest"  # container tag fallback
