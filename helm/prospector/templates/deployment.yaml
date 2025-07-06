@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: {{ .Release.Name }} }
+  template:
+    metadata:
+      labels: { app: {{ .Release.Name }} }
+    spec:
+      containers:
+      - name: prospector
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        - secretRef:
+            name: {{ .Values.envFromSecret }}
+        livenessProbe:
+          exec: { command: ["echo", "live"] }
+          initialDelaySeconds: 20
+        readinessProbe:
+          exec: { command: ["echo", "ready"] }
+          initialDelaySeconds: 5
+
