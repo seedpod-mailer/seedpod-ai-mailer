@@ -31,7 +31,7 @@ jobs:
       - uses: azure/setup-kubectl@v3
       - name: Helm upgrade
         run: |
-          helm upgrade --install prospector helm/prospector \
+          helm upgrade --install prospector ./helm/prospector \
             --namespace $NAMESPACE --create-namespace \
             --set image.repository=$IMAGE_REPO \
             --set image.tag=sha-${{ github.sha }}
