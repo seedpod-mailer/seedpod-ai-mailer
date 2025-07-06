@@ -1,0 +1,37 @@
+name: Build & Deploy Prospector
+on:
+  push:
+    branches: [main]
+env:
+  IMAGE_REPO: ghcr.io/seedpod-mailer/prospector
+  NAMESPACE: mailer-infra
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./agents/prospector
+          push: true
+          tags: ${{ env.IMAGE_REPO }}:sha-${{ github.sha }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decode kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > kubeconfig
+          echo "KUBECONFIG=$PWD/kubeconfig" >> $GITHUB_ENV
+      - uses: azure/setup-kubectl@v3
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install prospector helm/prospector \
+            --namespace $NAMESPACE --create-namespace \
+            --set image.repository=$IMAGE_REPO \
+            --set image.tag=sha-${{ github.sha }}
