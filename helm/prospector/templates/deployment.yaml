@@ -12,6 +12,8 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      imagePullSecrets:
+        - name: ghcr-creds
       containers:
         - name: prospector
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
